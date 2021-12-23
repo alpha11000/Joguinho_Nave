@@ -7,26 +7,95 @@ namespace Jogo_Navinha
 {
     internal class Program
     {
+
         static void Main(string[] args)
         {
-            string[,] screen = getStringMatrix(8, 30, "");
-
             Console.WriteLine("Insira um número para definir a probabilidade de spawn de inimigos(1 - 40):");
             int prob = 44 - Convert.ToInt32(Console.ReadLine());
 
             Console.WriteLine("Defina o valor para o delay em que os inimigos se aproximam(em ms):");
             int delayTime = Convert.ToInt32(Console.ReadLine());
 
+            string[,] screen = getScreenMatrix(8, 15, "", " A");
+            int playerPosition = 0;
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            long currentTime = 0;
+            int totalLifes = 10;
 
-            for (int i = 0; i < 1000; i++)
+            //controladores de tempo
+            long enemyScreenUpdateTime = (long)delayTime;
+            long lastEnemyScreenUpdate = 0;
+
+            long playerScreenUpdateTime = 100;
+            long lastPlayerScreenUpdate = 0;
+
+            int restLifes = totalLifes;
+
+            watch.Start();
+
+            while(true)
             {
-                downScreen(screen, 15);
-                spawnEnemys(screen, "{#}", prob);
-                Console.Clear();
-                showScreen(screen, true);
-                
-                Thread.Sleep(delayTime);
+                currentTime = watch.ElapsedMilliseconds;
+
+                if(currentTime - lastPlayerScreenUpdate >= playerScreenUpdateTime)
+                {
+                    if (Console.KeyAvailable)
+                    {
+                        var pressedKey = Console.ReadKey(true);
+
+                        switch (pressedKey.Key)
+                        {
+                            case ConsoleKey.LeftArrow:
+                                playerPosition = movePlayer(true, screen, playerPosition);
+                                break;
+
+                            case ConsoleKey.RightArrow:
+                                playerPosition = movePlayer(false, screen, playerPosition);
+                                break;
+                        }
+                        Console.Clear();
+                        //showLastLine(screen);
+                        showScreen(screen, restLifes, true);
+
+                    }
+                    lastPlayerScreenUpdate = currentTime;
+                }
+
+                if(currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
+                {
+                    restLifes -= downScreen(screen, 15);
+                    spawnEnemys(screen, "{#}", prob);
+                    Console.Clear();
+                    showScreen(screen, restLifes, true);
+
+                    lastEnemyScreenUpdate = currentTime;
+              
+                }
+
             }
+
+        }
+
+        public static int movePlayer(bool left, string[,] screen, int atualPosition)
+        {
+
+            if((atualPosition >= screen.GetLength(1) - 1 && !left)|| atualPosition <= 0 && left)
+            {
+                return atualPosition;
+            }
+
+            int direction = (left) ? -1 : 1;
+
+            int screenLastLine = screen.GetLength(0) - 1;
+
+            screen[screenLastLine , atualPosition + direction] = screen[screenLastLine, atualPosition];
+            screen[screenLastLine , atualPosition] = "";
+
+            return atualPosition + direction;
+        }
+
+        public static void showLastLine(string[,] screen)
+        {
 
         }
 
@@ -41,24 +110,45 @@ namespace Jogo_Navinha
 
         }
 
-        public static void downScreen(string [,] screen, int exceptLine)
+        public static int downScreen(string [,] screen, int exceptLine) // retorna a quantidade de erros do player // -1 para fim de jogo
         {
-            string[] lastLine = new string[screen.GetLength(0)]; ;
+            string[] lastLine = new string[screen.GetLength(0)];
+            int erros = 0;
 
             for (int i = 1; i < screen.GetLength(0); i++)
             {
                 for(int j = 0; j < screen.GetLength(1); j++)
                 {
+                    if(screen[i, j] == " A") { 
+                        if(screen[i - 1, j] == "{#}")
+                        {
+                            erros = 1000000000;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
                     string tempLastLine = lastLine[j];
                     lastLine[j] = screen[i, j];
                     screen[i, j] = (i == 1) ? screen[i - 1, j] : tempLastLine;
+
+                    if(i == screen.GetLength(0) - 1 && screen[i , j].CompareTo("{#}") == 0)
+                    {
+                        erros++;
+                        screen[i, j] = "###";
+                    }
                 }
             }
 
-
+            return erros;
         }
 
-        public static void showScreen(String[,] screen, bool tabTexts){
+        public static void showScreen(String[,] screen, int restLifes, bool tabTexts){
+
+            Console.WriteLine("Vidas restantes:" + restLifes + "\n");
+
             for (int i = 0; i < screen.GetLength(0); i++)
             {
                 for(int j = 0; j < screen.GetLength(1); j++)
@@ -70,7 +160,7 @@ namespace Jogo_Navinha
             }
         }
 
-        public static string[,] getStringMatrix(int width, int height, string initialValue)
+        public static string[,] getScreenMatrix(int width, int height, string initialValue, string playerStyle)
         {
             string[,] textMatrix = new string[height, width];
 
@@ -81,6 +171,8 @@ namespace Jogo_Navinha
                     textMatrix[i, j] = initialValue;
                 }
             }
+
+            textMatrix[textMatrix.GetLength(0) - 1, 0] = playerStyle;
 
             return textMatrix;
         }
