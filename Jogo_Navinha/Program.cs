@@ -19,7 +19,7 @@ namespace Jogo_Navinha
             string[,] screen = getScreenMatrix(8, 15, "", " A");
             int playerPosition = 0;
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            long currentTime = 0;
+            long currentTime;
             int totalLifes = 10;
 
             //controladores de tempo
@@ -28,6 +28,9 @@ namespace Jogo_Navinha
 
             long playerScreenUpdateTime = 100;
             long lastPlayerScreenUpdate = 0;
+
+            long bulletsScreenUpdateTime = 200;
+            long lastBulletScreenUpdate = 0;
 
             int restLifes = totalLifes;
 
@@ -52,17 +55,35 @@ namespace Jogo_Navinha
                             case ConsoleKey.RightArrow:
                                 playerPosition = movePlayer(false, screen, playerPosition);
                                 break;
+
+                            case ConsoleKey.Spacebar:
+                                shoot(screen, playerPosition);
+                                Console.Clear();
+                                showScreen(screen, restLifes, true);
+                                break;
+                        
                         }
-                        Console.Clear();
-                        //showLastLine(screen);
-                        showScreen(screen, restLifes, true);
+                        showLastLine(screen, true);
+                        //showScreen(screen, restLifes, true);
 
                     }
                     lastPlayerScreenUpdate = currentTime;
                 }
 
+                if(currentTime - lastBulletScreenUpdate >= bulletsScreenUpdateTime)
+                {
+                    if (moveBulletsUp(screen))
+                    {
+                        moveBulletsUp(screen);
+                        Console.Clear();
+                        showScreen(screen, restLifes, true);
+                    }
+                    
+                }
+
                 if(currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
                 {
+
                     restLifes -= downScreen(screen, 15);
                     spawnEnemys(screen, "{#}", prob);
                     Console.Clear();
@@ -94,9 +115,64 @@ namespace Jogo_Navinha
             return atualPosition + direction;
         }
 
-        public static void showLastLine(string[,] screen)
+        public static bool shoot(string [ , ] screen, int playerPosition)
         {
 
+            int shootInitialHeight = screen.GetLength(0) - 2;
+            string bullet = " |";
+            bool hit = false;
+
+            if(screen[shootInitialHeight , playerPosition] == "{#}")
+            {
+                hit = true;
+                bullet = "###";
+            }
+
+            screen[shootInitialHeight, playerPosition] = bullet;
+
+            return hit;
+        }
+
+        public static bool moveBulletsUp(string[,] screen)
+        {
+            bool hasBullet = false;
+
+            for(int i = 1; i < screen.GetLength(0) - 1; i++)
+            {
+                for(int j = 0; j < screen.GetLength(1); j++)
+                {
+                    if(screen[i, j] == " |")
+                    {
+
+                        hasBullet = true;
+
+                        if(screen[i - 1, j] == "{#}")
+                        {
+                            screen[i - 1, j] = "###";
+                            screen[i, j] = "";
+                        }
+                        else
+                        {
+                            screen[i - 1, j] = screen[i, j];
+                            screen[i, j] = "";
+                        }
+                    }
+                }
+            }
+            return hasBullet;
+        }
+
+        public static void showLastLine(string[,] screen, bool tabText)
+        {
+            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
+
+            for(int i = 0; i < screen.GetLength(1); i++)
+            {
+                Console.Write(screen[screen.GetLength(0) - 1, i]);
+                Console.Write((tabText) ? "\t" : "");
+            }
+
+            Console.WriteLine();
         }
 
         public static void spawnEnemys(string [,] screen, string enemyStyle, int prob)
@@ -119,6 +195,14 @@ namespace Jogo_Navinha
             {
                 for(int j = 0; j < screen.GetLength(1); j++)
                 {
+                    if(screen[i,j] == " |" || screen[i,j] == "###")
+                    {
+                        lastLine[j] = "";
+                        continue;
+                    }
+
+                
+
                     if(screen[i, j] == " A") { 
                         if(screen[i - 1, j] == "{#}")
                         {
