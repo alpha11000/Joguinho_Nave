@@ -1,0 +1,15 @@
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\obj\Debug\Joguinho_Nave.csproj.SuggestedBindingRedirects.cache
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\obj\Debug\Joguinho_Nave.csproj.CoreCompileInputs.cache
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\obj\Debug\Jogo_Navinha.exe
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\obj\Debug\Jogo_Navinha.pdb
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\bin\Debug\Jogo_Navinha.exe.config
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\bin\Debug\Jogo_Navinha.exe
+C:\Users\Cliente\source\repos\Jogo_Navinha\Jogo_Navinha\bin\Debug\Jogo_Navinha.pdb
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\bin\Debug\Joguinho_Nave.exe.config
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\bin\Debug\Joguinho_Nave.exe
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\bin\Debug\Joguinho_Nave.pdb
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\obj\Debug\Joguinho_Nave.csproj.AssemblyReference.cache
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\obj\Debug\Joguinho_Nave.csproj.SuggestedBindingRedirects.cache
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\obj\Debug\Joguinho_Nave.csproj.CoreCompileInputs.cache
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\obj\Debug\Joguinho_Nave.exe
+C:\Users\Cliente\source\repos\Joguinho_Nave\Joguinho_Nave\obj\Debug\Joguinho_Nave.pdb
