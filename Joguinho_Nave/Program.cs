@@ -36,6 +36,7 @@ namespace Joguinho_Nave
             long lastShot = 0;
 
             int restLifes = totalLifes;
+            int pont = 0;
 
             watch.Start();
             Console.Clear();
@@ -72,7 +73,14 @@ namespace Joguinho_Nave
 
                 if(currentTime - lastBulletScreenUpdate >= bulletsScreenUpdateTime)
                 {
-                    BulletsUp(screen);
+                    int hits = BulletsUp(screen);
+
+                    if(hits > 0)
+                    {
+                        pont += hits;
+                        updateLifesAndScoreScreen(restLifes, pont);
+                    }
+
                     lastBulletScreenUpdate = currentTime;
                 }
 
@@ -87,10 +95,11 @@ namespace Joguinho_Nave
 
                         if(restLifes <= 0)
                         {
+                            updateLifesAndScoreScreen(0, pont);
                             break;
                         }
 
-                        updateLifesAndScoreScreen(restLifes);
+                        updateLifesAndScoreScreen(restLifes, pont);
 
                     }
 
@@ -98,6 +107,9 @@ namespace Joguinho_Nave
                 }
 
             }
+
+            
+            Console.ReadKey();
 
         }
 
@@ -113,10 +125,10 @@ namespace Joguinho_Nave
             }
         }
 
-        public static void updateLifesAndScoreScreen(int restLifes)
+        public static void updateLifesAndScoreScreen(int restLifes, int pont)
         {
-            Console.SetCursorPosition(16, Console.WindowTop);
-            Console.Write(restLifes + "\t");
+            Console.SetCursorPosition(0, Console.WindowTop);
+            Console.Write("Vidas restantes: " + restLifes + "\t" + "Pontuação: " + pont);
         }
 
 
@@ -160,9 +172,10 @@ namespace Joguinho_Nave
 
 
 
-        public static void BulletsUp(string[,] screen)
+        public static int BulletsUp(string[,] screen)
         {
             bool hasBulletOnLine;
+            int  hits = 0;
 
             for (int i = 0; i < screen.GetLength(0); i++)
             {
@@ -183,6 +196,7 @@ namespace Joguinho_Nave
                         if(screen[i - 1, j] == "{#}")
                         {
                             screen[i - 1, j] = "###";
+                            hits++;
                         }
                         else {
                             screen[i - 1, j] = screen[i, j];
@@ -201,6 +215,8 @@ namespace Joguinho_Nave
                     }
                 }
             }
+
+            return hits;
         }
 
 
@@ -258,7 +274,6 @@ namespace Joguinho_Nave
                         if (lastLine[j] == "{#}")
                         {
                             screen[i , j] = "###";
-                            erros++;
                         }
 
                         lastLine[j] = "";
@@ -275,6 +290,7 @@ namespace Joguinho_Nave
                     if(screen[i, j] == " A") { 
                         if(screen[i - 1, j] == "{#}")
                         {
+                            screen[i, j] = "#^#";
                             erros = 1000000000;
                         }
                         else
