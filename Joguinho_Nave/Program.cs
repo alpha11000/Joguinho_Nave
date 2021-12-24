@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Joguinho_Nave
 {
@@ -81,8 +78,22 @@ namespace Joguinho_Nave
 
                 if(currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
                 {
-                    downScreen(screen, 0);
+                    int errors = downScreen(screen, 0);
                     spawnEnemys(screen, "{#}", prob);
+
+                    if(errors > 0)
+                    {
+                        restLifes -= errors;
+
+                        if(restLifes <= 0)
+                        {
+                            break;
+                        }
+
+                        updateLifesAndScoreScreen(restLifes);
+
+                    }
+
                     lastEnemyScreenUpdate = currentTime;
                 }
 
@@ -100,6 +111,12 @@ namespace Joguinho_Nave
             {
                 Console.Write(screen[lineToUpdate-2, i] + ((tabText) ? "\t" : ""));
             }
+        }
+
+        public static void updateLifesAndScoreScreen(int restLifes)
+        {
+            Console.SetCursorPosition(16, Console.WindowTop);
+            Console.Write(restLifes + "\t");
         }
 
 
@@ -241,6 +258,7 @@ namespace Joguinho_Nave
                         if (lastLine[j] == "{#}")
                         {
                             screen[i , j] = "###";
+                            erros++;
                         }
 
                         lastLine[j] = "";
