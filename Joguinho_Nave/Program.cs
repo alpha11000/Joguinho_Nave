@@ -7,23 +7,14 @@ namespace Joguinho_Nave
 
         static void Main(string[] args)
         { 
-
-            Console.WriteLine("Insira um número para definir a probabilidade de spawn de inimigos(1 - 40):");
-            int prob = 44 - Convert.ToInt32(Console.ReadLine());
-
-            Console.WriteLine("Defina o valor para o delay em que os inimigos se aproximam(em ms):");
-            int delayTime = Convert.ToInt32(Console.ReadLine());
-
-            Console.CursorVisible = false;
-
-            string[,] screen = getScreenMatrix(20, 8, "", " A");
+            string[,] screen;
             int playerPosition = 0;
             var watch = System.Diagnostics.Stopwatch.StartNew();
             long currentTime;
             int totalLifes = 10;
 
             //controladores de tempo
-            long enemyScreenUpdateTime = (long)delayTime;
+            long enemyScreenUpdateTime;
             long lastEnemyScreenUpdate = 0;
 
             long playerScreenUpdateTime = 100;
@@ -39,77 +30,113 @@ namespace Joguinho_Nave
             int pont = 0;
 
             watch.Start();
-            Console.Clear();
-            showScreen(screen, restLifes, true);
 
-            while(true)
+
+            while (true)
             {
-                currentTime = watch.ElapsedMilliseconds;
+                Console.Clear();
+                Console.WriteLine("Insira um número para definir a probabilidade de spawn de inimigos(1 - 40):");
+                int prob = 44 - Convert.ToInt32(Console.ReadLine());
 
-                if(currentTime - lastPlayerScreenUpdate >= playerScreenUpdateTime)
+                Console.WriteLine("Defina o valor para o delay em que os inimigos se aproximam(em ms):");
+                int delayTime = Convert.ToInt32(Console.ReadLine());
+
+                screen = getScreenMatrix(20, 8, "", " A");
+                playerPosition = 0;
+
+                enemyScreenUpdateTime = (long)delayTime;
+                
+                lastEnemyScreenUpdate = 0;
+                lastPlayerScreenUpdate = 0;
+                lastBulletScreenUpdate = 0;
+                lastShot = 0;
+
+                restLifes = totalLifes;
+                pont = 0;
+
+                Console.CursorVisible = false;
+                Console.Clear();
+                showScreen(screen, restLifes, true);
+
+                while (true)
                 {
-                    if (Console.KeyAvailable)
-                    {
-                        var pressedKey = Console.ReadKey(true);
+                    currentTime = watch.ElapsedMilliseconds;
 
-                        switch (pressedKey.Key)
+                    if (currentTime - lastPlayerScreenUpdate >= playerScreenUpdateTime)
+                    {
+                        if (Console.KeyAvailable)
                         {
-                            case ConsoleKey.LeftArrow:
-                                playerPosition = movePlayer(true, screen, playerPosition);
-                                break;
+                            var pressedKey = Console.ReadKey(true);
 
-                            case ConsoleKey.RightArrow:
-                                playerPosition = movePlayer(false, screen, playerPosition);
-                                break;
-                            case ConsoleKey.Spacebar:
-                                shoot(screen, playerPosition);
-                                break;
+                            switch (pressedKey.Key)
+                            {
+                                case ConsoleKey.LeftArrow:
+                                    playerPosition = movePlayer(true, screen, playerPosition);
+                                    break;
+
+                                case ConsoleKey.RightArrow:
+                                    playerPosition = movePlayer(false, screen, playerPosition);
+                                    break;
+                                case ConsoleKey.Spacebar:
+                                    shoot(screen, playerPosition);
+                                    break;
+                            }
+                            updateSpecificConsolePart(screen, screen.GetLength(0) + 1, playerPosition, true);
+
                         }
-                        updateSpecificConsolePart(screen, screen.GetLength(0)+1, playerPosition, true);
-
-                    }
-                    lastPlayerScreenUpdate = currentTime;
-                }
-
-                if(currentTime - lastBulletScreenUpdate >= bulletsScreenUpdateTime)
-                {
-                    int hits = BulletsUp(screen);
-
-                    if(hits > 0)
-                    {
-                        pont += hits;
-                        updateLifesAndScoreScreen(restLifes, pont);
+                        lastPlayerScreenUpdate = currentTime;
                     }
 
-                    lastBulletScreenUpdate = currentTime;
-                }
-
-                if(currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
-                {
-                    int errors = downScreen(screen, 0);
-                    spawnEnemys(screen, "{#}", prob);
-
-                    if(errors > 0)
+                    if (currentTime - lastBulletScreenUpdate >= bulletsScreenUpdateTime)
                     {
-                        restLifes -= errors;
+                        int hits = BulletsUp(screen);
 
-                        if(restLifes <= 0)
+                        if (hits > 0)
                         {
-                            updateLifesAndScoreScreen(0, pont);
-                            break;
+                            pont += hits;
+                            updateLifesAndScoreScreen(restLifes, pont);
                         }
 
-                        updateLifesAndScoreScreen(restLifes, pont);
-
+                        lastBulletScreenUpdate = currentTime;
                     }
 
-                    lastEnemyScreenUpdate = currentTime;
-                }
+                    if (currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
+                    {
+                        int errors = downScreen(screen, 0);
+                        spawnEnemys(screen, "{#}", prob);
 
+                        if (errors > 0)
+                        {
+                            restLifes -= errors;
+
+                            if (restLifes <= 0)
+                            {
+                                updateLifesAndScoreScreen(0, pont);
+                                break;
+                            }
+
+                            updateLifesAndScoreScreen(restLifes, pont);
+
+                        }
+
+                        lastEnemyScreenUpdate = currentTime;
+                    }
+
+                }
+                Console.Clear();
+                Console.WriteLine("\n############ Você Perdeu :( ############\n");
+                Console.WriteLine("\n############ Sua pontuação: " + pont + " ##########");
+                Console.WriteLine("\n##### Deseja tentar novamente? (Y/N)####\n");
+                Console.CursorVisible = true;
+                string choice = Console.ReadLine();
+
+                if(!(choice.Contains("Y") || choice.Contains("y")))
+                {
+                    break;
+                }
             }
 
-            
-            Console.ReadKey();
+            watch.Stop();
 
         }
 
