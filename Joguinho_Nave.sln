@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jogo_Navinha", "Jogo_Navinha\Jogo_Navinha.csproj", "{7E58E066-B9BD-47F2-9B5F-CDE6E884141B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Joguinho_Nave", "Jogo_Navinha\Joguinho_Nave.csproj", "{7E58E066-B9BD-47F2-9B5F-CDE6E884141B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

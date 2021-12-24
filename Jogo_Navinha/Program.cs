@@ -3,20 +3,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace Jogo_Navinha
+namespace Joguinho_Nave
 {
     internal class Program
     {
 
         static void Main(string[] args)
-        {
+        { 
+
             Console.WriteLine("Insira um número para definir a probabilidade de spawn de inimigos(1 - 40):");
             int prob = 44 - Convert.ToInt32(Console.ReadLine());
 
             Console.WriteLine("Defina o valor para o delay em que os inimigos se aproximam(em ms):");
             int delayTime = Convert.ToInt32(Console.ReadLine());
 
-            string[,] screen = getScreenMatrix(8, 15, "", " A");
+            Console.CursorVisible = false;
+
+            string[,] screen = getScreenMatrix(20, 8, "", " A");
             int playerPosition = 0;
             var watch = System.Diagnostics.Stopwatch.StartNew();
             long currentTime;
@@ -29,12 +32,17 @@ namespace Jogo_Navinha
             long playerScreenUpdateTime = 100;
             long lastPlayerScreenUpdate = 0;
 
-            long bulletsScreenUpdateTime = 200;
+            long bulletsScreenUpdateTime = 50;
             long lastBulletScreenUpdate = 0;
+
+            long shotMinimumTime = bulletsScreenUpdateTime;
+            long lastShot = 0;
 
             int restLifes = totalLifes;
 
             watch.Start();
+            Console.Clear();
+            showScreen(screen, restLifes, true);
 
             while(true)
             {
@@ -55,16 +63,11 @@ namespace Jogo_Navinha
                             case ConsoleKey.RightArrow:
                                 playerPosition = movePlayer(false, screen, playerPosition);
                                 break;
-
                             case ConsoleKey.Spacebar:
                                 shoot(screen, playerPosition);
-                                Console.Clear();
-                                showScreen(screen, restLifes, true);
                                 break;
-                        
                         }
-                        showLastLine(screen, true);
-                        //showScreen(screen, restLifes, true);
+                        updateSpecificConsolePart(screen, screen.GetLength(0)+1, playerPosition, true);
 
                     }
                     lastPlayerScreenUpdate = currentTime;
@@ -72,30 +75,33 @@ namespace Jogo_Navinha
 
                 if(currentTime - lastBulletScreenUpdate >= bulletsScreenUpdateTime)
                 {
-                    if (moveBulletsUp(screen))
-                    {
-                        moveBulletsUp(screen);
-                        Console.Clear();
-                        showScreen(screen, restLifes, true);
-                    }
-                    
+                    BulletsUp(screen);
+                    lastBulletScreenUpdate = currentTime;
                 }
 
                 if(currentTime - lastEnemyScreenUpdate >= enemyScreenUpdateTime)
                 {
-
-                    restLifes -= downScreen(screen, 15);
+                    downScreen(screen, 0);
                     spawnEnemys(screen, "{#}", prob);
-                    Console.Clear();
-                    showScreen(screen, restLifes, true);
-
                     lastEnemyScreenUpdate = currentTime;
-              
                 }
 
             }
 
         }
+
+        public static void updateSpecificConsolePart(string[,] screen, int lineToUpdate, int lineStart, bool tabText)
+        {
+            int localLineStart = (lineStart == 0)? 0 : lineStart - 1;
+
+            Console.SetCursorPosition(localLineStart * ((tabText) ? 8 : 1), lineToUpdate); //o 8 representa o espaço ocupado por uma tabulação
+            
+            for(int i = localLineStart; i < screen.GetLength(1); i++)
+            {
+                Console.Write(screen[lineToUpdate-2, i] + ((tabText) ? "\t" : ""));
+            }
+        }
+
 
         public static int movePlayer(bool left, string[,] screen, int atualPosition)
         {
@@ -115,6 +121,7 @@ namespace Jogo_Navinha
             return atualPosition + direction;
         }
 
+
         public static bool shoot(string [ , ] screen, int playerPosition)
         {
 
@@ -129,42 +136,60 @@ namespace Jogo_Navinha
             }
 
             screen[shootInitialHeight, playerPosition] = bullet;
+            updateSpecificConsolePart(screen, shootInitialHeight + 2, playerPosition, true);
 
             return hit;
         }
 
-        public static bool moveBulletsUp(string[,] screen)
+
+
+        public static void BulletsUp(string[,] screen)
         {
-            bool hasBullet = false;
+            bool hasBulletOnLine;
 
-            for(int i = 1; i < screen.GetLength(0) - 1; i++)
+            for (int i = 0; i < screen.GetLength(0); i++)
             {
-                for(int j = 0; j < screen.GetLength(1); j++)
-                {
-                    if(screen[i, j] == " |")
-                    {
+                hasBulletOnLine = false;
 
-                        hasBullet = true;
+                for (int j = 0; j < screen.GetLength(1); j++)
+                {
+                    if (screen[i,j] == " |")
+                    {
+                        hasBulletOnLine = true;
+
+                        if(i == 0)
+                        {
+                            screen[i, j] = "";
+                            continue;
+                        }
 
                         if(screen[i - 1, j] == "{#}")
                         {
                             screen[i - 1, j] = "###";
-                            screen[i, j] = "";
                         }
-                        else
-                        {
+                        else {
                             screen[i - 1, j] = screen[i, j];
-                            screen[i, j] = "";
                         }
+
+                        screen[i, j] = "";
+                    }
+                }
+
+                if (hasBulletOnLine)
+                {
+                    updateSpecificConsolePart(screen, i + 2, 0, true);
+                    
+                    if(i != 0) {
+                        updateSpecificConsolePart(screen, i + 1, 0, true);
                     }
                 }
             }
-            return hasBullet;
         }
 
-        public static void showLastLine(string[,] screen, bool tabText)
+
+        public static void showLastLine(string[,] screen, bool tabText, int atualPosition)
         {
-            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
+            Console.SetCursorPosition(atualPosition, Console.CursorTop - 1);
 
             for(int i = 0; i < screen.GetLength(1); i++)
             {
@@ -175,33 +200,59 @@ namespace Jogo_Navinha
             Console.WriteLine();
         }
 
+
+
         public static void spawnEnemys(string [,] screen, string enemyStyle, int prob)
         {
             Random rand = new Random();
+            //int minimumEnemyPosition = -1;
 
             for(int j = 0; j < screen.GetLength(1); j++)
             {
+                /*if((rand.Next() % prob) == 0)
+                {
+                    if(minimumEnemyPosition < j) { minimumEnemyPosition = j; }
+                    screen[0, j] = enemyStyle;
+                }
+                else
+                {
+                    screen[0, j] = "";
+                }*/
+
                 screen[0, j] = ((rand.Next() % prob) == 0) ? enemyStyle : "";
             }
-
+            updateSpecificConsolePart(screen, 2, 0, true);
         }
+
+
 
         public static int downScreen(string [,] screen, int exceptLine) // retorna a quantidade de erros do player // -1 para fim de jogo
         {
             string[] lastLine = new string[screen.GetLength(0)];
             int erros = 0;
+            string atualValue;
 
             for (int i = 1; i < screen.GetLength(0); i++)
             {
                 for(int j = 0; j < screen.GetLength(1); j++)
                 {
-                    if(screen[i,j] == " |" || screen[i,j] == "###")
+                    if (screen[i, j] == " |")
                     {
+                        if (lastLine[j] == "{#}")
+                        {
+                            screen[i , j] = "###";
+                        }
+
                         lastLine[j] = "";
+
                         continue;
                     }
 
-                
+                    if (screen[i,j] == "###")
+                    {
+                        screen[i, j] = "";
+                    }
+
 
                     if(screen[i, j] == " A") { 
                         if(screen[i - 1, j] == "{#}")
@@ -223,11 +274,14 @@ namespace Jogo_Navinha
                         erros++;
                         screen[i, j] = "###";
                     }
-                }
-            }
 
+                }
+                updateSpecificConsolePart(screen, i+2, 0, true);
+            }
             return erros;
         }
+
+
 
         public static void showScreen(String[,] screen, int restLifes, bool tabTexts){
 
@@ -244,7 +298,7 @@ namespace Jogo_Navinha
             }
         }
 
-        public static string[,] getScreenMatrix(int width, int height, string initialValue, string playerStyle)
+        public static string[,] getScreenMatrix(int height, int width, string initialValue, string playerStyle)
         {
             string[,] textMatrix = new string[height, width];
 
