@@ -54,9 +54,9 @@ namespace Joguinho_Nave
                 restLifes = totalLifes;
                 pont = 0;
 
-                Console.CursorVisible = false;
                 Console.Clear();
                 showScreen(screen, restLifes, true);
+                Console.CursorVisible = false;
 
                 while (true)
                 {
@@ -346,7 +346,7 @@ namespace Joguinho_Nave
 
         public static void showScreen(String[,] screen, int restLifes, bool tabTexts){
 
-            Console.WriteLine("Vidas restantes:" + restLifes + "\n");
+            Console.Write("Vidas restantes: " + restLifes + "\t" + "Pontuação: 0\n");
 
             for (int i = 0; i < screen.GetLength(0); i++)
             {
